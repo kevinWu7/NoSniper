@@ -1,5 +1,6 @@
 #include <iostream>
 #include <asio.hpp>
+#include "FileResponse.h"
 
 void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr) {
   try {

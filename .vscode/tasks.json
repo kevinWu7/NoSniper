@@ -23,7 +23,7 @@
                 ],
             }
         },
-        {   // 在build文件夹中调用cmake进行项目配置
+        {   // 在debug_build文件夹中调用cmake进行项目配置
             // 除windows系统外执行的命令为`cmake -DCMAKE_BUILD_TYPE=<Debug|Release|RelWithDebInfo|MinSizeRel> ../`
             // windows系统是在visual stuido的环境中执行命令`cmake -DCMAKE_BUILD_TYPE=<Debug|Release|RelWithDebInfo|MinSizeRel>  ../ -G "CodeBlocks - NMake Makefiles"`
             "label": "cmake",

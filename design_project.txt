@@ -1,0 +1,42 @@
+实现同步服务的和推送服务
+方案设计：
+服务端存储的文件列表：
+- Data
+  -config
+  -storage
+  -version.json
+
+
+version.json为什么存在
+提供一个索引信息，类似meta元数据，存放文件的id，路径，文件名，版本号，大小，md5等信息
+对正在使用的客户端的请求，做出最小集返回。
+场景：pc-win有一段时间未登陆，初次登陆，请求差量的部分。那么需要提供一份当前的version集合，服务端对比后进行返回。
+
+version.json
+  {
+    name:端午节.html;
+    path:storage/3月份/file1.html;
+    version:1.0;
+    id:43f43fsfa6546;//唯一id
+  },
+  { 
+    name:兴趣爱好.html;
+    path:storage/生活随笔/兴趣爱好.html;
+    version:1.0;
+    id:43f43fsfa6546;//唯一id
+  },
+
+
+"收到更新->更新version.json和文件->触发推送" 此三者为一个原子性操作。
+防止同时更新数据，导致数据错乱。
+
+
+数据传输协议：
+传输过程中压缩
+服务端压缩->客户端->客户端解压->展示
+客户端修改->压缩->服务端->简单校验->存储->更新version.json
+
+
+
+
+
