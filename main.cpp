@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 #include <asio.hpp>
 
 
@@ -16,11 +18,20 @@ void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr) {
       std::getline(is, message);
       std::cout << "接收到消息：" << message <<  std::endl;
 
+      
       // Send a response to the client
-      std::string response = "Hello725日 from server!\n";
-      asio::write(socket, asio::buffer(response));
-
-  } catch (std::exception& e) {
+      std::time_t now = std::time(nullptr);
+      std::tm localTime = *std::localtime(&now);
+       // Create the desired format
+      std::ostringstream oss;
+      oss << std::put_time(&localTime, "%Y%m%d %H:%M:%S");
+      std::string formattedTime = oss.str();
+      std::string res_message = "server response: "+ formattedTime+"\n";
+      asio::write(socket, asio::buffer(res_message));
+      std::cout << "Send message: " << res_message << std::endl;
+  } 
+  catch (std::exception& e) 
+  {
     std::cerr << "Exception: " << e.what() << std::endl;
   }
 }
