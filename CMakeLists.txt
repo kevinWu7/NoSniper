@@ -7,8 +7,9 @@ add_definitions(-DASIO_STANDALONE) #设置asio的独立版，不需要boost
 include_directories ("/Users/wuchengcheng/CodeProject/cppProject/NoSniper/asio")  #指定asio的路径
 include_directories ("/Users/wuchengcheng/CodeProject/cppProject/NoSniper/include")
 
-set(CMAKE_CXX_STANDARD 17) # 指定为C++11 版本
+set(CMAKE_CXX_STANDARD 17) # 指定为C++17 版本
 add_executable (${PROJECT_NAME} ${SRC_FILE}) # 要求编译可执行文件
+
 
 
 

@@ -4,10 +4,6 @@
 #include "FileResponse.h"
 
 
-
-
-
-
 std::vector<unsigned char> FileResponse::GetAllFile(std::string path)
 {
     std::ifstream file(path, std::ios::binary); // 打开二进制文件

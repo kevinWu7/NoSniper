@@ -1,6 +1,6 @@
 #include <iostream>
 #include <asio.hpp>
-#include "FileResponse.h"
+
 
 void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr) {
   try {
@@ -17,7 +17,7 @@ void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr) {
       std::cout << "接收到消息：" << message <<  std::endl;
 
       // Send a response to the client
-      std::string response = "Hello from server!\n";
+      std::string response = "Hello725日 from server!\n";
       asio::write(socket, asio::buffer(response));
 
   } catch (std::exception& e) {
@@ -36,7 +36,7 @@ void start_server() {
     while (true) {
       // Wait for client connection
       std::shared_ptr<asio::ip::tcp::socket> socket_ptr = std::make_shared<asio::ip::tcp::socket>(io_context);
-      acceptor.accept(*socket_ptr);
+      acceptor.accept(*socket_ptr);  //这句代码会阻塞当前while true。新客户端建立连接后，会继续往下走
 
       // Create a new thread to handle the client connection
       std::thread t([socket_ptr]()
