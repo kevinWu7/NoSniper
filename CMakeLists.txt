@@ -1,15 +1,25 @@
-cmake_minimum_required (VERSION 3.1) #最低要求的CMake版本
-project(NoSniper) # 项目名称
+cmake_minimum_required (VERSION 3.1)
+project(NoSniper)
 
-file(GLOB SRC_FILE main.cpp) # 建立变量SRC_FILE为目录下.c文件列表
+# 设置C++标准
+set(CMAKE_CXX_STANDARD 17)
 
-add_definitions(-DASIO_STANDALONE) #设置asio的独立版，不需要boost
+# 添加可执行文件，将源文件和头文件分开
+file(GLOB SOURCE_FILES
+    "${CMAKE_SOURCE_DIR}/include/external/zlib/*.c"
+    "${CMAKE_SOURCE_DIR}/src/*.cpp"
+)
 
-include_directories("${CMAKE_SOURCE_DIR}/asio")#指定asio的路径
+# 添加include目录
 include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_SOURCE_DIR}/include/external/asio")
+include_directories("${CMAKE_SOURCE_DIR}/include/external/zlib")
 
-set(CMAKE_CXX_STANDARD 17) # 指定为C++17 版本
-add_executable (${PROJECT_NAME} ${SRC_FILE}) # 要求编译可执行文件
+# 创建可执行文件
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} )
+
+# 设置asio的宏定义
+target_compile_definitions(${PROJECT_NAME} PRIVATE -DASIO_STANDALONE)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux") #linux需要添加thread库
     find_package(Threads REQUIRED)
