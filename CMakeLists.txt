@@ -21,10 +21,14 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES} )
 # 设置asio的宏定义
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DASIO_STANDALONE)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux") #linux需要添加thread库
+#因为asio跨平台需要用到各个平台的网络库，所以要加上相关链接
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux") 
     find_package(Threads REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
 endif()
+
 
 
  
