@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <unistd.h>
 #include "asio.hpp"
-#include "../include/external/zlib/zlib.h"
+#include "src/zlib.h"
 
 
 void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr) {
