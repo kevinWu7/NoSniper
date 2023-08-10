@@ -4,6 +4,6 @@
 class FileResponse
 {
 public:
-    std::vector<unsigned char> GetAllFile(std::string path);
+    std::vector<unsigned char> GetAllFile();
 
 };

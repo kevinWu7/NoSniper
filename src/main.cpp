@@ -3,7 +3,9 @@
 #include <iomanip>
 #include <unistd.h>
 #include "asio.hpp"
-#include "src/zlib.h"
+#include "zlib.h"
+#include "filehelper.h"
+#include "zip.h"
 
 
 void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr) {
@@ -108,8 +110,38 @@ void maycompress()
 	delete [] pCompressedData;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  if (argc < 1) {
+        std::cerr << "No command-line arguments provided." << std::endl;
+        return 1;
+  }
+  auto baseDir=filehelper::getBaseDir(argv[0]);
+  std::cout<<"argv:" +std::string(argv[0])<<std::endl;
+  std::cout<<"current Path:" + baseDir.string()<<std::endl;
+
+    /* if (filehelper::compressFolder(baseDir, compressedData)) 
+    {
+        // 'compressedData' now contains the compressed data of the entire folder
+        // You can save it to a file or use it as needed
+    }
+    else 
+    {
+        std::cerr << "Compression failed." << std::endl;
+    }*/
+
   maycompress();
+  
+
+  std::vector<uint8_t> compressedData = filehelper::CompressFolder(baseDir/"dataFile");
+  
+  std::cout<<"compressedData length:"+ std::to_string(compressedData.size())<<std::endl;
+
+   filehelper::DecompressFolder(compressedData, baseDir/"realdata");
+    std::cout << "Decompression failed." << std::endl;
+    
+
+
+
   std::cout<<"start server"<<std::endl;
   start_server();
   return 0;
