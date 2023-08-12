@@ -14,6 +14,8 @@ file(GLOB MINIZLIB_SOURCES
 # 创建一个静态库
 add_library(${PROJECT_NAME}  STATIC ${MINIZLIB_SOURCES})
 
+include_directories("${CMAKE_SOURCE_DIR}/external/zlib")
+
 # 设置minizip的头文件路径，主程序minizip的头文件时能都自动检测该路径
 target_include_directories(${PROJECT_NAME}  PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 

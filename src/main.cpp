@@ -135,12 +135,13 @@ int main(int argc, char *argv[])
   }*/
 
   maycompress();
-
-  std::vector<uint8_t> compressedData = filehelper::CompressFolder(baseDir / "dataFile");
-
+ 
+  std::filesystem::path dataFilepath=baseDir;
+  std::vector<uint8_t> compressedData = filehelper::CompressFolder(dataFilepath.append("dataFile").string());
   std::cout << "compressedData length:" + std::to_string(compressedData.size()) << std::endl;
-
-  filehelper::DecompressFolder(compressedData, baseDir / "realdata");
+ 
+ std::filesystem::path targetPath=baseDir;
+  filehelper::DecompressFolder(compressedData, targetPath.append("realdata").string());
   std::cout << "Decompression failed." << std::endl;
 
   std::cout << "start server" << std::endl;
