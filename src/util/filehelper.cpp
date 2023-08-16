@@ -5,17 +5,17 @@
 #include <cstdint>
 #include <string>
 #include <cstdio>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "filehelper.h"
 #include "zip.h"
 #include "zlib.h"
 #include "unzip.h"
 #include "baseinfo.h"
-#include <cstdint>
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
-std::wstring filehelper::ConvertToWStringFromUTF8(const std::string &utf8Str)
+
+/*std::wstring filehelper::ConvertToWStringFromUTF8(const std::string &utf8Str)
 {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
     return converter.from_bytes(utf8Str);
@@ -25,7 +25,8 @@ std::string filehelper::ConvertToStringFromWString(const std::wstring &wstr)
 {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
     return converter.to_bytes(wstr);
-}
+}*/
+std::filesystem::path filehelper::rootDir="";
 
 std::filesystem::path filehelper::getBaseDir(char *argv)
 {

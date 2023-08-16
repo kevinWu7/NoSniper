@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include "asio.hpp"
 #include "zlib.h"
-#include "filehelper.h"
 #include "zip.h"
+#include "filehelper.h"
 
 void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr)
 {
@@ -13,26 +13,43 @@ void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr)
   {
     asio::ip::tcp::socket &socket = *socket_ptr;
 
-    // Read data sent by the client
-    asio::streambuf buffer;
-    asio::read_until(socket, buffer, '\n');
+    while (true)
+    {
+      // Read data sent by the client
+      asio::streambuf buffer;
+      asio::read_until(socket, buffer, '\n'); // 会阻塞
 
-    // Convert the data to a string and output it
-    std::istream is(&buffer);
-    std::string message;
-    std::getline(is, message);
-    std::cout << "接收到消息：" << message << std::endl;
+      // Convert the data to a string and output it
+      std::istream is(&buffer);
+      std::string message;
+      std::getline(is, message);
+      std::cout << "接收到消息：" << message << std::endl;
 
-    // Send a response to the client
-    std::time_t now = std::time(nullptr);
-    std::tm localTime = *std::localtime(&now);
-    // Create the desired format
-    std::ostringstream oss;
-    oss << std::put_time(&localTime, "%Y%m%d %H:%M:%S");
-    std::string formattedTime = oss.str();
-    std::string res_message = "server response: " + formattedTime + "\n";
-    asio::write(socket, asio::buffer(res_message));
-    std::cout << "Send message: " << res_message << std::endl;
+  
+      // Send a response to the client
+      std::time_t now = std::time(nullptr);
+      std::tm localTime = *std::localtime(&now);
+      // Create the desired format
+      std::ostringstream oss;
+      oss << std::put_time(&localTime, "%Y%m%d %H:%M:%S");
+      std::string formattedTime = oss.str();
+      
+      if (message.find("GET_ALL_FILE") != std::string::npos)
+      {
+        std::cout << "GET_ALL_FILE" << std::endl;
+        std::filesystem::path baseDir = filehelper::rootDir;
+        std::vector<uint8_t> compressedData = filehelper::CompressFolder(baseDir.append("dataFile"));
+        std::cout << "compressedData's length : "+ std::to_string(compressedData.size()) << std::endl;
+        asio::write(socket, asio::buffer(compressedData));
+      }
+      else
+      {
+        std::cout << "no type" << std::endl;
+        std::string res_message = "server response: " + formattedTime + "\n";
+        asio::write(socket, asio::buffer(res_message));
+        std::cout << "Send message: " << res_message << std::endl;
+      }
+    }
   }
   catch (std::exception &e)
   {
@@ -57,8 +74,7 @@ void start_server()
       acceptor.accept(*socket_ptr); // 这句代码会阻塞当前while true。新客户端建立连接后，会继续往下走
 
       // Create a new thread to handle the client connection
-      std::thread t([socket_ptr]()
-                    {
+      std::thread t([socket_ptr](){
         handle_client(socket_ptr);
         if(socket_ptr)
         {
@@ -120,9 +136,10 @@ int main(int argc, char *argv[])
     std::cerr << "No command-line arguments provided." << std::endl;
     return 1;
   }
-  auto baseDir = filehelper::getBaseDir(argv[0]);
+  filehelper::rootDir = filehelper::getBaseDir(argv[0]);
+
   std::cout << "argv:" + std::string(argv[0]) << std::endl;
-  std::cout << "current Path:" + baseDir.string() << std::endl;
+  std::cout << "current Path:" + filehelper::rootDir.string() << std::endl;
 
   /* if (filehelper::compressFolder(baseDir, compressedData))
   {
@@ -135,14 +152,14 @@ int main(int argc, char *argv[])
   }*/
 
   maycompress();
- 
-  std::filesystem::path dataFilepath=baseDir;
-  std::vector<uint8_t> compressedData = filehelper::CompressFolder(dataFilepath.append("dataFile").string());
+
+  /*std::filesystem::path targetDir = filehelper::rootDir;
+  std::vector<uint8_t> compressedData = filehelper::CompressFolder(targetDir.append("dataFile"));
   std::cout << "compressedData length:" + std::to_string(compressedData.size()) << std::endl;
- 
- std::filesystem::path targetPath=baseDir;
-  filehelper::DecompressFolder(compressedData, targetPath.append("realdata").string());
-  std::cout << "Decompression failed." << std::endl;
+
+  std::filesystem::path targetDir2 = filehelper::rootDir;
+  filehelper::DecompressFolder(compressedData, targetDir2.append("realdata"));
+  std::cout << "Decompression failed." << std::endl;*/
 
   std::cout << "start server" << std::endl;
   start_server();
