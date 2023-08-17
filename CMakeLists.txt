@@ -32,6 +32,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE minizip)# 链接minizip库
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux") 
     find_package(Threads REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+    target_link_libraries(${PROJECT_NAME} PRIVATE  stdc++fs)
+
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
 endif()
