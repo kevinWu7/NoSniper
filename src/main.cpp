@@ -6,6 +6,8 @@
 #include "zlib.h"
 #include "zip.h"
 #include "filehelper.h"
+#include "baseinfo.h"
+
 
 void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr)
 {
@@ -39,7 +41,16 @@ void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr)
         std::cout << "GET_ALL_FILE" << std::endl;
         std::filesystem::path baseDir = filehelper::rootDir;
         std::vector<uint8_t> compressedData = filehelper::CompressFolder(baseDir.append("dataFile"));
+       uint64_t datalength=compressedData.size();
+
         std::cout << "compressedData's length : "+ std::to_string(compressedData.size()) << std::endl;
+        // 将整数值以大端序填充到中间8个字节
+     // 将uint64_t值以大端序填充到中间8个字节（第5到第12个字节）
+    for (int i = 0; i < 8; ++i) {
+        SniperHead[4 + i] = (datalength >> (56 - i * 8)) & 0xFF;
+    }
+      compressedData.insert(compressedData.begin(), SniperHead, SniperHead + sn_totalHeadLength);
+
         asio::write(socket, asio::buffer(compressedData));
       }
       else
