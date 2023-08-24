@@ -38,8 +38,9 @@ void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr)
       {
         std::cout << "GET_ALL_FILE" << std::endl;
         std::filesystem::path baseDir = filehelper::rootDir;
-        std::vector<uint8_t> compressedData = filehelper::CompressFolder(baseDir.append("dataFile"));
-       uint64_t datalength=compressedData.size();
+        auto targetDir= baseDir.append("dataFile");
+        std::vector<uint8_t> compressedData = filehelper::CompressFolder(targetDir.string());
+        uint64_t datalength=compressedData.size();
 
         std::cout << "compressedData's length : "+ std::to_string(compressedData.size()) << std::endl;
         // 将整数值以大端序填充到中间8个字节
