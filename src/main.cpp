@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-#include <unistd.h>
 #include "asio.hpp"
 #include "zlib.h"
 #include "zip.h"
@@ -14,7 +13,6 @@ void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr)
   try
   {
     asio::ip::tcp::socket &socket = *socket_ptr;
-
     while (true)
     {
       // Read data sent by the client
