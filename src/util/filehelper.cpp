@@ -5,9 +5,6 @@
 #include <cstdint>
 #include <string>
 #include <cstdio>
-#ifdef _WIN32
-#include <windows.h>
-#endif
 #include "filehelper.h"
 #include "zip.h"
 #include "zlib.h"
@@ -15,17 +12,6 @@
 #include "baseinfo.h"
 
 
-/*std::wstring filehelper::ConvertToWStringFromUTF8(const std::string &utf8Str)
-{
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-    return converter.from_bytes(utf8Str);
-}
-
-std::string filehelper::ConvertToStringFromWString(const std::wstring &wstr)
-{
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-    return converter.to_bytes(wstr);
-}*/
 std::filesystem::path filehelper::rootDir="";
 
 std::filesystem::path filehelper::getBaseDir(char *argv)
@@ -42,7 +28,7 @@ void filehelper::TraverseAndCompress(zipFile zipArchive, const std::string &fold
     for (const auto &entry : std::filesystem::directory_iterator(folderPath))
     {
         const std::string entryPath = entry.path().string();
-        const std::string entryName = relativePath.empty() ? entry.path().filename().string() : relativePath + PATH_SEPARATOR + entry.path().filename().string();
+        const std::string entryName = relativePath.empty() ? entry.path().filename().string() : relativePath +  std::filesystem::path::preferred_separator + entry.path().filename().string();
         std::cout << "entryPath:" << entryPath << std::endl;
         std::cout << "entryName:" << entryName << std::endl;
         if (entry.is_regular_file())
@@ -55,40 +41,27 @@ void filehelper::TraverseAndCompress(zipFile zipArchive, const std::string &fold
         }
     }
 }
-
 void filehelper::AddFileToZip(zipFile zipArchive, const std::string &filePath, const std::string &entryName)
 {
-#ifdef _WIN32
-    std::wstring wFilePath;
-    int wFilePathLength = MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, nullptr, 0);
-    if (wFilePathLength > 0)
-    {
-        wFilePath.resize(wFilePathLength);
-        MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, &wFilePath[0], wFilePathLength);
-    }
-
-    FILE *sourceFile = _wfopen(wFilePath.c_str(), L"rb");
-#else
-    FILE *sourceFile = fopen(filePath.c_str(), "rb");
-#endif
-
+    std::ifstream sourceFile(filePath, std::ios::binary);
+    
     if (sourceFile)
     {
         zip_fileinfo fileInfo = {0};
         zipOpenNewFileInZip4_64(zipArchive, entryName.c_str(), &fileInfo, nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION, 0, -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, nullptr, 0, 45, 0, 0);
-
+        
         const size_t bufferSize = 1024;
         uint8_t buffer[bufferSize];
         size_t bytesRead;
-
+        
         do
         {
-            bytesRead = fread(buffer, 1, bufferSize, sourceFile);
+            sourceFile.read(reinterpret_cast<char*>(buffer), bufferSize);
+            bytesRead = sourceFile.gcount();
             zipWriteInFileInZip(zipArchive, buffer, static_cast<uint32_t>(bytesRead));
         } while (bytesRead > 0);
-
+        
         zipCloseFileInZip(zipArchive);
-        fclose(sourceFile);
     }
 }
 
@@ -107,18 +80,17 @@ std::vector<uint8_t> filehelper::CompressFolder(const std::string &folderPath)
     zipClose(zipArchive, nullptr);
 
     // Read the compressed data from the zip file and store it in the vector
-    FILE *zipFile = fopen("compressed.zip", "rb");
+    std::ifstream zipFile("compressed.zip", std::ios::binary);
     if (zipFile)
     {
-        fseek(zipFile, 0, SEEK_END);
-        compressedData.resize(ftell(zipFile));
-        rewind(zipFile);
-        fread(&compressedData[0], 1, compressedData.size(), zipFile);
-        fclose(zipFile);
+        zipFile.seekg(0, std::ios::end);
+        compressedData.resize(zipFile.tellg());
+        zipFile.seekg(0, std::ios::beg);
+        zipFile.read(reinterpret_cast<char*>(&compressedData[0]), compressedData.size());
     }
 
     // Remove the temporary zip file
-    remove("compressed.zip");
+    std::remove("compressed.zip");
 
     return compressedData;
 }
@@ -166,7 +138,7 @@ std::vector<uint8_t> filehelper::DecompressFolder(const std::vector<uint8_t> &co
         }
 
         std::string fullFilename = filename;
-        std::string outputPath = outputFolderPath + PATH_SEPARATOR + fullFilename;
+        std::string outputPath = outputFolderPath + std::filesystem::path::preferred_separator + fullFilename;
         if (unzOpenCurrentFile(unzipArchive) != UNZ_OK)
         {
             unzClose(unzipArchive);
@@ -174,10 +146,10 @@ std::vector<uint8_t> filehelper::DecompressFolder(const std::vector<uint8_t> &co
         }
 
         // Find last occurrence of path separator
-        size_t lastSeparator = fullFilename.find_last_of(PATH_SEPARATOR);
+        size_t lastSeparator = fullFilename.find_last_of( std::filesystem::path::preferred_separator);
         if (lastSeparator != std::string::npos)
         {
-            std::string folderPath = outputFolderPath + PATH_SEPARATOR + fullFilename.substr(0, lastSeparator);
+            std::string folderPath = outputFolderPath +  std::filesystem::path::preferred_separator + fullFilename.substr(0, lastSeparator);
             std::filesystem::create_directories(folderPath);
         }
 
@@ -208,9 +180,7 @@ std::vector<uint8_t> filehelper::DecompressFolder(const std::vector<uint8_t> &co
             }
         }
     }
-
     unzClose(unzipArchive);
-
     return decompressedData;
 }
 
