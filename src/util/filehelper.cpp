@@ -28,7 +28,7 @@ void filehelper::TraverseAndCompress(zipFile zipArchive, const std::string &fold
     for (const auto &entry : std::filesystem::directory_iterator(folderPath))
     {
         const std::string entryPath = entry.path().string();
-        const std::string entryName = relativePath.empty() ? entry.path().filename().string() : relativePath +  std::filesystem::path::preferred_separator + entry.path().filename().string();
+        const std::string entryName = relativePath.empty() ? entry.path().filename().string() : relativePath + PATH_SEPARATOR + entry.path().filename().string();
         std::cout << "entryPath:" << entryPath << std::endl;
         std::cout << "entryName:" << entryName << std::endl;
         if (entry.is_regular_file())
@@ -138,7 +138,7 @@ std::vector<uint8_t> filehelper::DecompressFolder(const std::vector<uint8_t> &co
         }
 
         std::string fullFilename = filename;
-        std::string outputPath = outputFolderPath + std::filesystem::path::preferred_separator + fullFilename;
+        std::string outputPath = outputFolderPath +PATH_SEPARATOR + fullFilename;
         if (unzOpenCurrentFile(unzipArchive) != UNZ_OK)
         {
             unzClose(unzipArchive);
@@ -149,7 +149,7 @@ std::vector<uint8_t> filehelper::DecompressFolder(const std::vector<uint8_t> &co
         size_t lastSeparator = fullFilename.find_last_of( std::filesystem::path::preferred_separator);
         if (lastSeparator != std::string::npos)
         {
-            std::string folderPath = outputFolderPath +  std::filesystem::path::preferred_separator + fullFilename.substr(0, lastSeparator);
+            std::string folderPath = outputFolderPath + PATH_SEPARATOR + fullFilename.substr(0, lastSeparator);
             std::filesystem::create_directories(folderPath);
         }
 
