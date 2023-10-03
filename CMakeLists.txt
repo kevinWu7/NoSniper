@@ -13,6 +13,7 @@ file(GLOB SOURCE_FILES
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/include/util")
 include_directories("${CMAKE_SOURCE_DIR}/external/asio")
+include_directories("${CMAKE_SOURCE_DIR}/external")
 
 # 创建可执行文件
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} )

@@ -6,7 +6,9 @@
 #include "zip.h"
 #include "filehelper.h"
 #include "baseinfo.h"
-
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
 void handle_client(std::shared_ptr<asio::ip::tcp::socket> socket_ptr)
 {
